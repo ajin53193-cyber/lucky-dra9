@@ -316,7 +316,7 @@ export default function Home() {
                   className="flex items-center gap-2 px-4 text-[12px] whitespace-nowrap" style={{ color: "#C9D6F5" }}>
                   <span className="font-mono blue-text">{maskWallet(w.wallet)}</span>
                   <span className="font-num gold-text text-[13px]">{w.amount} USDT</span>
-                  <span>{w.status === "redeemed" ? "已兑换" : w.status === "expired" ? "已过期" : "待兑换"}</span>
+                  <span>{w.status === "submitted" ? "已提交" : "待领取"}</span>
                 </div>
               ))}
             </div>
@@ -330,11 +330,7 @@ export default function Home() {
           <div className="flex items-center rounded-full p-1.5" style={{ background: "linear-gradient(180deg,#132A6E,#0A1A4C)" }}>
             <button data-testid="nav-codes" onClick={() => navigate("/codes")} className="flex-1 py-2.5 text-[15px] font-black gold-text">我的抽奖码</button>
             <span className="w-px h-8" style={{ background: "rgba(160,190,255,0.35)" }} />
-            <button data-testid="nav-coupons" onClick={() => navigate("/coupons")} className="flex-[1.3] py-1 flex flex-col items-center">
-              <span className="text-[15px] font-black text-white">我的领取券</span>
-              <span className="text-[10px] mt-0.5" style={{ color: "#C9D6F5" }}>邀请不赠送抽奖码</span>
-            </button>
-            <button data-testid="nav-invite" onClick={() => navigate("/invite")} className="btn-blue px-7 py-3 text-[18px] tracking-widest">邀请</button>
+            <button data-testid="nav-invite" onClick={() => navigate("/invite")} className="btn-blue px-10 py-3 text-[18px] tracking-widest">邀请</button>
           </div>
         </div>
       </motion.div>
@@ -343,7 +339,7 @@ export default function Home() {
         <button data-testid="nav-rules" onClick={() => navigate("/rules")} className="flex items-center gap-0.5">活动规则 <ChevronRight size={13} /></button>
         <button data-testid="nav-redeem" onClick={() => navigate("/redeem")} className="flex items-center gap-0.5">客服兑换 <ChevronRight size={13} /></button>
       </div>
-      <p className="relative z-10 text-center text-[12px] mt-3" style={{ color: "#AFC0E8" }}>中奖后生成领取券，凭券联系客服兑换USDT</p>
+      <p className="relative z-10 text-center text-[12px] mt-3" style={{ color: "#AFC0E8" }}>中奖后填写收款账户，客服核验后发放 USDT</p>
 
       <WinModal result={result} onClose={() => setResult(null)} onContact={() => { setResult(null); navigate("/redeem"); }} />
     </div>

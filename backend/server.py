@@ -90,51 +90,40 @@ async def spin(body: DrawCodeValidate):
         raise HTTPException(status_code=400, detail="抽奖码无效、已使用或已过期")
 
     amount = random.choices(PRIZES, weights=PRIZE_WEIGHTS, k=1)[0]
-    coupon_code = gen_code("LC")
+    wallet = doc.get("wallet", "0x" + "".join(random.choices("0123456789abcdef", k=40)))
 
     await db.draw_codes.update_one({"code": code}, {"$set": {"status": "used", "used_at": datetime.now(timezone.utc).isoformat()}})
-    await db.coupons.insert_one({
-        "code": coupon_code,
-        "amount": amount,
-        "status": "pending",
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "expires_at": (datetime.now(timezone.utc) + timedelta(days=7)).isoformat(),
-    })
-    wallet = doc.get("wallet", "0x" + "".join(random.choices("0123456789abcdef", k=40)))
     await db.winners.insert_one({
         "wallet": wallet,
         "amount": amount,
-        "coupon_code": coupon_code,
-        "status": "pending",
+        "code": code,
+        "status": "won",
         "created_at": datetime.now(timezone.utc).isoformat(),
     })
-    return DrawResult(code=code, amount=amount, coupon_code=coupon_code)
+    return DrawResult(code=code, amount=amount, coupon_code="")
 
 
 class RedeemSubmit(BaseModel):
-    coupon_code: str
+    code: str
     address: str
     network: str = "TRC20"
 
 
-@api_router.post("/coupons/redeem")
-async def redeem_coupon(body: RedeemSubmit):
-    code = body.coupon_code.strip().upper()
+@api_router.post("/draw/claim")
+async def claim_prize(body: RedeemSubmit):
+    code = body.code.strip().upper()
     address = body.address.strip()
     if not address:
         raise HTTPException(status_code=400, detail="请填写收款账户")
-    doc = await db.coupons.find_one({"code": code}, {"_id": 0})
+    doc = await db.winners.find_one({"code": code}, {"_id": 0})
     if not doc:
-        raise HTTPException(status_code=400, detail="券码无效")
-    if doc["status"] != "pending":
-        raise HTTPException(status_code=400, detail="该券已提交或已过期")
-    if doc.get("expires_at", "") < datetime.now(timezone.utc).isoformat():
-        raise HTTPException(status_code=400, detail="领取券已过期")
-    await db.coupons.update_one({"code": code}, {"$set": {
+        raise HTTPException(status_code=400, detail="未找到中奖记录")
+    if doc["status"] != "won":
+        raise HTTPException(status_code=400, detail="该奖励已提交领取")
+    await db.winners.update_one({"code": code}, {"$set": {
         "status": "submitted", "address": address, "network": body.network,
         "submitted_at": datetime.now(timezone.utc).isoformat(),
     }})
-    await db.winners.update_one({"coupon_code": code}, {"$set": {"status": "submitted"}})
     return {"ok": True, "message": "领取申请已提交，客服核验后发放 USDT"}
 
 
@@ -148,16 +137,6 @@ async def my_codes(user_id: str = Query("guest")):
     return {"codes": codes}
 
 
-@api_router.get("/coupons/my")
-async def my_coupons(user_id: str = Query("guest")):
-    coupons = await db.coupons.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1).to_list(100)
-    now = datetime.now(timezone.utc).isoformat()
-    for c in coupons:
-        if c["status"] == "pending" and c.get("expires_at", "") < now:
-            c["status"] = "expired"
-    return {"coupons": coupons}
-
-
 @api_router.get("/winners/recent")
 async def recent_winners(limit: int = Query(20, ge=1, le=50)):
     winners = await db.winners.find({}, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
@@ -166,8 +145,8 @@ async def recent_winners(limit: int = Query(20, ge=1, le=50)):
 
 @api_router.get("/pool/stats")
 async def pool_stats():
-    total = await db.coupons.aggregate([
-        {"$match": {"status": "pending"}},
+    total = await db.winners.aggregate([
+        {"$match": {"status": "won"}},
         {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
     ]).to_list(1)
     used = total[0]["total"] if total else 0
@@ -206,20 +185,14 @@ async def seed_demo_data():
         await db.draw_codes.insert_many(codes)
     if await db.winners.count_documents({}) == 0:
         winners = [
-            {"wallet": "0x8f3cf7a2b1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8", "amount": 1000, "coupon_code": "LC20261108001", "status": "pending", "created_at": (now - timedelta(hours=2)).isoformat()},
-            {"wallet": "0x2a4b6c8d0e1f3a5b7c9d1e3f5a7b9c1d3e5f7a9b", "amount": 200, "coupon_code": "LC20261107002", "status": "redeemed", "created_at": (now - timedelta(hours=5)).isoformat()},
-            {"wallet": "0x9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d", "amount": 50, "coupon_code": "LC20261106003", "status": "redeemed", "created_at": (now - timedelta(days=1)).isoformat()},
-            {"wallet": "0x1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c", "amount": 5000, "coupon_code": "LC20261105004", "status": "redeemed", "created_at": (now - timedelta(days=2)).isoformat()},
-            {"wallet": "0xf1e2d3c4b5a69788796a5b4c3d2e1f0a9b8c7d6e", "amount": 10, "coupon_code": "LC20261104005", "status": "expired", "created_at": (now - timedelta(days=3)).isoformat()},
+            {"wallet": "0x8f3cf7a2b1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8", "amount": 8888, "status": "won", "created_at": (now - timedelta(hours=2)).isoformat()},
+            {"wallet": "0x2a4b6c8d0e1f3a5b7c9d1e3f5a7b9c1d3e5f7a9b", "amount": 1888, "status": "won", "created_at": (now - timedelta(hours=5)).isoformat()},
+            {"wallet": "0x9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d", "amount": 588, "status": "won", "created_at": (now - timedelta(days=1)).isoformat()},
+            {"wallet": "0x1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c", "amount": 58, "status": "won", "created_at": (now - timedelta(days=2)).isoformat()},
+            {"wallet": "0xf1e2d3c4b5a69788796a5b4c3d2e1f0a9b8c7d6e", "amount": 18, "status": "won", "created_at": (now - timedelta(days=3)).isoformat()},
         ]
         await db.winners.insert_many(winners)
-    if await db.coupons.count_documents({}) == 0:
-        coupons = [
-            {"code": "LC20261108001", "user_id": "guest", "amount": 1000, "status": "pending", "created_at": (now - timedelta(hours=2)).isoformat(), "expires_at": (now + timedelta(days=5)).isoformat()},
-            {"code": "LC20261025002", "user_id": "guest", "amount": 50, "status": "redeemed", "created_at": (now - timedelta(days=12)).isoformat(), "expires_at": (now - timedelta(days=5)).isoformat()},
-            {"code": "LC20261010001", "user_id": "guest", "amount": 10, "status": "expired", "created_at": (now - timedelta(days=27)).isoformat(), "expires_at": (now - timedelta(days=20)).isoformat()},
-        ]
-        await db.coupons.insert_many(coupons)
+
 
 
 app.include_router(api_router)

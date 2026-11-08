@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Headset, X, ChevronRight, Wallet, CheckCircle2 } from "lucide-react";
+import { Headset, X, Wallet, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { ASSETS, Coin, Sparkle, Ribbon } from "@/components/Decor";
-import { redeemCoupon } from "@/api";
+import { claimPrize } from "@/api";
 
 const Confetti = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -19,23 +19,17 @@ const Confetti = () => (
   </div>
 );
 
-const fmtDate = (d) => {
-  const pad = (n) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-};
-
 export const WinModal = ({ result, onClose, onContact }) => {
   const [address, setAddress] = useState("");
   const [network, setNetwork] = useState("TRC20");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const expires = result ? fmtDate(new Date(result.expires_at || Date.now() + 7 * 24 * 3600 * 1000)) : "";
 
   const doRedeem = async () => {
     if (!address.trim()) return toast.error("请填写收款账户地址");
     setSubmitting(true);
     try {
-      await redeemCoupon(result.coupon_code, address, network);
+      await claimPrize(result.code, address, network);
       setSubmitted(true);
       toast.success("领取申请已提交");
     } catch (e) {
@@ -101,26 +95,7 @@ export const WinModal = ({ result, onClose, onContact }) => {
                     <span className="gold-title font-num leading-none" style={{ fontSize: 54 }}>{result.amount}</span>
                     <span className="gold-title font-num text-[26px]">USDT</span>
                   </div>
-                  <div className="flex items-center justify-center gap-3 mt-2">
-                    <span className="h-px w-10" style={{ background: "linear-gradient(90deg, transparent, #FCE7B0)" }} />
-                    <span className="text-[17px] font-black text-white">已生成专属领取券</span>
-                    <span className="h-px w-10" style={{ background: "linear-gradient(90deg, #FCE7B0, transparent)" }} />
-                  </div>
-
-                  <div className="mt-4 rounded-2xl px-4 py-3 text-left" style={{ background: "rgba(10,28,90,0.55)", border: "1px solid rgba(140,190,255,0.4)" }}>
-                    <div className="flex items-center gap-3">
-                      <span className="text-[13px] text-white/90 shrink-0">领取券卡号</span>
-                      <span data-testid="coupon-code-text" className="font-num text-[18px] tracking-wide text-white truncate">{result.coupon_code}</span>
-                    </div>
-                    <div className="flex justify-between items-center mt-1.5">
-                      <span className="text-[11px]" style={{ color: "#9DB4E8" }}>有效期 7 天 · 过期失效</span>
-                      <span className="btn-gold px-3 py-0.5 text-[12px]">未兑换</span>
-                    </div>
-                  </div>
-
-                  <button onClick={onContact} className="mt-3 text-[14px] inline-flex items-center gap-0.5" style={{ color: "#DCE8FF" }}>
-                    请复制券码，<span className="blue-text" style={{ color: "#A8D4FF" }}>联系客服核验兑换</span> <ChevronRight size={14} />
-                  </button>
+                  <p className="text-[14px] mt-3" style={{ color: "#DCE8FF" }}>填写收款账户，客服核验后直接发放 USDT</p>
 
                   {submitted ? (
                     <div data-testid="redeem-success" className="mt-4 rounded-2xl px-4 py-4 text-center" style={{ background: "rgba(20,80,50,0.45)", border: "1px solid rgba(94,224,160,0.5)" }}>
@@ -153,16 +128,9 @@ export const WinModal = ({ result, onClose, onContact }) => {
                     </div>
                   )}
 
-                  <div className="flex gap-3 mt-4">
-                    <button data-testid="copy-coupon-btn" className="btn-gold flex-1 py-3 text-[17px] flex items-center justify-center gap-1.5"
-                      onClick={() => { navigator.clipboard?.writeText(result.coupon_code).catch(() => {}); toast.success("券码已复制"); }}>
-                      <Copy size={16} /> 复制券码
-                    </button>
-                    <button data-testid="contact-service-btn" className="btn-gold flex-1 py-3 text-[17px] flex items-center justify-center gap-1.5" onClick={onContact}>
-                      <Headset size={16} /> 去联系客服
-                    </button>
-                  </div>
-                  <p className="text-[14px] mt-4 text-white">领取券有效期至 <span className="font-num text-[16px]">{expires}</span></p>
+                  <button data-testid="contact-service-btn" onClick={onContact} className="mt-4 text-[14px] inline-flex items-center gap-1" style={{ color: "#DCE8FF" }}>
+                    <Headset size={14} /> 有疑问？联系在线客服
+                  </button>
                 </div>
               </div>
             </div>
