@@ -6,6 +6,7 @@ import { Logo } from "@/components/Logo";
 import { WinModal } from "@/components/WinModal";
 import { Coin, Sparkle, Ribbon, TechFrame } from "@/components/Decor";
 import { validateCode, spin, getRecentWinners, getPoolStats } from "@/api";
+import { playClick, playSpin, playWin } from "@/sound";
 import { toast } from "sonner";
 
 const PRIZES = [5000, 1000, 200, 50, 10, 2];
@@ -150,6 +151,7 @@ export default function Home() {
   }, []);
 
   const doValidate = async () => {
+    playClick();
     if (!code.trim()) return setCheckState("fail");
     setCheckState("loading");
     try {
@@ -165,6 +167,7 @@ export default function Home() {
   const doSpin = async () => {
     if (!validatedCode || spinning) return;
     setSpinning(true);
+    playSpin();
     try {
       const res = await spin(validatedCode);
       const options = SEGMENTS.map((p, i) => (p === res.data.amount ? i : -1)).filter((i) => i >= 0);
@@ -179,6 +182,7 @@ export default function Home() {
       setTimeout(() => {
         setSpinning(false);
         setResult(res.data);
+        playWin();
         setValidatedCode(null);
         setCheckState(null);
         setCode("");
