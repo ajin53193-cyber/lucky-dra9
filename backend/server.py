@@ -111,6 +111,33 @@ async def spin(body: DrawCodeValidate):
     return DrawResult(code=code, amount=amount, coupon_code=coupon_code)
 
 
+class RedeemSubmit(BaseModel):
+    coupon_code: str
+    address: str
+    network: str = "TRC20"
+
+
+@api_router.post("/coupons/redeem")
+async def redeem_coupon(body: RedeemSubmit):
+    code = body.coupon_code.strip().upper()
+    address = body.address.strip()
+    if not address:
+        raise HTTPException(status_code=400, detail="请填写收款账户")
+    doc = await db.coupons.find_one({"code": code}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=400, detail="券码无效")
+    if doc["status"] != "pending":
+        raise HTTPException(status_code=400, detail="该券已提交或已过期")
+    if doc.get("expires_at", "") < datetime.now(timezone.utc).isoformat():
+        raise HTTPException(status_code=400, detail="领取券已过期")
+    await db.coupons.update_one({"code": code}, {"$set": {
+        "status": "submitted", "address": address, "network": body.network,
+        "submitted_at": datetime.now(timezone.utc).isoformat(),
+    }})
+    await db.winners.update_one({"coupon_code": code}, {"$set": {"status": "submitted"}})
+    return {"ok": True, "message": "领取申请已提交，客服核验后发放 USDT"}
+
+
 @api_router.get("/codes/my")
 async def my_codes(user_id: str = Query("guest")):
     codes = await db.draw_codes.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1).to_list(100)

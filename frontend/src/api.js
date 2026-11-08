@@ -10,3 +10,4 @@ export const getRecentWinners = () => axios.get(`${API}/winners/recent`);
 export const getPoolStats = () => axios.get(`${API}/pool/stats`);
 export const getInviteInfo = () => axios.get(`${API}/invite/info?user_id=guest`);
 export const getLeaderboard = () => axios.get(`${API}/invite/leaderboard`);
+export const redeemCoupon = (coupon_code, address, network) => axios.post(`${API}/coupons/redeem`, { coupon_code, address, network });

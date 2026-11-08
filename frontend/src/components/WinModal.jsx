@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Headset, X, ChevronRight } from "lucide-react";
+import { Copy, Headset, X, ChevronRight, Wallet, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { ASSETS, Coin, Sparkle, Ribbon } from "@/components/Decor";
+import { redeemCoupon } from "@/api";
 
 const Confetti = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -23,7 +25,25 @@ const fmtDate = (d) => {
 };
 
 export const WinModal = ({ result, onClose, onContact }) => {
+  const [address, setAddress] = useState("");
+  const [network, setNetwork] = useState("TRC20");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const expires = result ? fmtDate(new Date(result.expires_at || Date.now() + 7 * 24 * 3600 * 1000)) : "";
+
+  const doRedeem = async () => {
+    if (!address.trim()) return toast.error("请填写收款账户地址");
+    setSubmitting(true);
+    try {
+      await redeemCoupon(result.coupon_code, address, network);
+      setSubmitted(true);
+      toast.success("领取申请已提交");
+    } catch (e) {
+      toast.error(e.response?.data?.detail || "提交失败");
+    } finally {
+      setSubmitting(false);
+    }
+  };
   return (
     <AnimatePresence>
       {result && (
@@ -101,6 +121,37 @@ export const WinModal = ({ result, onClose, onContact }) => {
                   <button onClick={onContact} className="mt-3 text-[14px] inline-flex items-center gap-0.5" style={{ color: "#DCE8FF" }}>
                     请复制券码，<span className="blue-text" style={{ color: "#A8D4FF" }}>联系客服核验兑换</span> <ChevronRight size={14} />
                   </button>
+
+                  {submitted ? (
+                    <div data-testid="redeem-success" className="mt-4 rounded-2xl px-4 py-4 text-center" style={{ background: "rgba(20,80,50,0.45)", border: "1px solid rgba(94,224,160,0.5)" }}>
+                      <CheckCircle2 size={26} className="mx-auto mb-1.5" style={{ color: "#5EE0A0" }} />
+                      <p className="text-[15px] font-bold text-white">领取申请已提交</p>
+                      <p className="text-[12px] mt-1" style={{ color: "#9DB4E8" }}>客服核验后将发放 USDT 至你的收款账户</p>
+                    </div>
+                  ) : (
+                    <div className="mt-4 rounded-2xl px-4 py-4 text-left" style={{ background: "rgba(10,28,90,0.55)", border: "1px solid rgba(140,190,255,0.4)" }}>
+                      <p className="text-[13px] font-bold text-white mb-2 flex items-center gap-1.5"><Wallet size={14} style={{ color: "#F5C76B" }} /> 填写收款账户领取奖励</p>
+                      <div className="flex gap-2 mb-2">
+                        {["TRC20", "ERC20"].map((n) => (
+                          <button key={n} data-testid={`network-${n}`} onClick={() => setNetwork(n)}
+                            className="px-4 py-1.5 rounded-full text-[12px] font-bold"
+                            style={network === n
+                              ? { background: "linear-gradient(135deg,#F7D98C,#E8B24A)", color: "#231A08" }
+                              : { background: "rgba(140,190,255,0.12)", color: "#9DB4E8", border: "1px solid rgba(140,190,255,0.3)" }}>
+                            {n}
+                          </button>
+                        ))}
+                      </div>
+                      <input data-testid="address-input" value={address} onChange={(e) => setAddress(e.target.value)}
+                        placeholder={`输入 ${network} 收款地址`}
+                        className="w-full bg-transparent border rounded-xl px-3.5 py-2.5 text-[13px] font-mono outline-none"
+                        style={{ borderColor: "rgba(140,190,255,0.35)", color: "#EDF1FA" }} />
+                      <button data-testid="submit-redeem-btn" onClick={doRedeem} disabled={submitting}
+                        className="btn-gold w-full py-3 mt-3 text-[16px]">
+                        {submitting ? "提交中..." : "提交领取申请"}
+                      </button>
+                    </div>
+                  )}
 
                   <div className="flex gap-3 mt-4">
                     <button data-testid="copy-coupon-btn" className="btn-gold flex-1 py-3 text-[17px] flex items-center justify-center gap-1.5"
