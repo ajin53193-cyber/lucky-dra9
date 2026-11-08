@@ -9,6 +9,7 @@ import MyCoupons from "@/pages/MyCoupons";
 import Invite from "@/pages/Invite";
 import Redeem from "@/pages/Redeem";
 import Rules from "@/pages/Rules";
+import { PageBg } from "@/components/Decor";
 
 function App() {
   useEffect(() => {
@@ -19,17 +20,20 @@ function App() {
   }, []);
 
   return (
-    <div className="App max-w-[480px] mx-auto min-h-screen" style={{ background: "#0F1320" }}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/codes" element={<MyCodes />} />
-          <Route path="/coupons" element={<MyCoupons />} />
-          <Route path="/invite" element={<Invite />} />
-          <Route path="/redeem" element={<Redeem />} />
-          <Route path="/rules" element={<Rules />} />
-        </Routes>
-      </BrowserRouter>
+    <div className="App relative max-w-[480px] mx-auto min-h-screen" style={{ background: "#050C26" }}>
+      <PageBg />
+      <div className="page-content" style={{ overflowX: "clip" }}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/codes" element={<MyCodes />} />
+            <Route path="/coupons" element={<MyCoupons />} />
+            <Route path="/invite" element={<Invite />} />
+            <Route path="/redeem" element={<Redeem />} />
+            <Route path="/rules" element={<Rules />} />
+          </Routes>
+        </BrowserRouter>
+      </div>
       <Toaster position="top-center" theme="dark" />
     </div>
   );
