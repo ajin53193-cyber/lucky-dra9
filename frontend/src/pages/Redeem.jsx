@@ -56,9 +56,9 @@ export default function Redeem() {
 
         {/* code card */}
         <motion.div className="glass px-5 pt-5 pb-4" style={{ borderRadius: 20 }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <p className="text-[20px] font-black text-white">GSET RWA 账户 ID</p>
+          <p className="text-[20px] font-black text-white">收款ID</p>
           <input data-testid="redeem-code-input" value={code} onChange={(e) => setCode(e.target.value)}
-            placeholder="请输入你的账户 ID"
+            placeholder="请输入你的收款ID"
             className="w-full mt-4 bg-white rounded-xl px-4 py-3.5 text-[17px] font-medium outline-none"
             style={{ color: "#152043", boxShadow: "inset 0 2px 4px rgba(0,0,0,0.08)" }} />
           <div className="flex justify-end mt-4">
@@ -78,13 +78,13 @@ export default function Redeem() {
           <p className="text-[16px] mt-2 text-white">客服时间：<span className="font-num text-[20px] gold-text">09:00-22:00</span></p>
           <p className="text-[16px] mt-1 text-white">平均响应时间：<span className="font-bold text-[18px] blue-text">3分钟</span></p>
           <button data-testid="contact-online-btn" className="btn-gold relative w-full py-3.5 mt-6 text-[19px] tracking-wider"
-            onClick={() => toast.info(code ? `账户 ID ${code} 已准备好，请等待客服接入` : "客服即将接入，请稍候")}>
+            onClick={() => toast.info(code ? `收款ID ${code} 已准备好，请等待客服接入` : "客服即将接入，请稍候")}>
             联系在线客服
           </button>
         </motion.div>
 
         <p className="flex items-center justify-center gap-1.5 text-[13px] text-white/95">
-          <CheckCircle2 size={16} style={{ color: "#F5C76B" }} /> 中奖后填写 GSET RWA 账户 ID，客服核验后发放 USDT
+          <CheckCircle2 size={16} style={{ color: "#F5C76B" }} /> 中奖后填写 GSET RWA 收款 ID，客服核验后发放 USDT
         </p>
       </div>
     </div>

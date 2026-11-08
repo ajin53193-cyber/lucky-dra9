@@ -94,7 +94,7 @@ export const WinModal = ({ result, onClose, onContact }) => {
                     <span className="gold-title font-num leading-none" style={{ fontSize: 54 }}>{result.amount}</span>
                     <span className="gold-title font-num text-[26px]">USDT</span>
                   </div>
-                  <p className="text-[14px] mt-3" style={{ color: "#DCE8FF" }}>填写 GSET RWA 账户 ID，客服核验后发放 USDT</p>
+                  <p className="text-[14px] mt-3" style={{ color: "#DCE8FF" }}>填写收款ID，客服核验后发放 USDT</p>
 
                   {submitted ? (
                     <div data-testid="redeem-success" className="mt-4 rounded-2xl px-4 py-4 text-center" style={{ background: "rgba(20,80,50,0.45)", border: "1px solid rgba(94,224,160,0.5)" }}>
@@ -104,9 +104,9 @@ export const WinModal = ({ result, onClose, onContact }) => {
                     </div>
                   ) : (
                     <div className="mt-4 rounded-2xl px-4 py-4 text-left" style={{ background: "rgba(10,28,90,0.55)", border: "1px solid rgba(140,190,255,0.4)" }}>
-                      <p className="text-[13px] font-bold text-white mb-2 flex items-center gap-1.5"><Wallet size={14} style={{ color: "#F5C76B" }} /> 填写 GSET RWA 账户 ID 领取奖励</p>
+                      <p className="text-[13px] font-bold text-white mb-2 flex items-center gap-1.5"><Wallet size={14} style={{ color: "#F5C76B" }} /> 填写收款ID领取奖励</p>
                       <input data-testid="account-id-input" value={accountId} onChange={(e) => setAccountId(e.target.value)}
-                        placeholder="输入你的 GSET RWA 账户 ID"
+                        placeholder="输入你的收款ID"
                         className="w-full bg-transparent border rounded-xl px-3.5 py-2.5 text-[14px] font-mono outline-none"
                         style={{ borderColor: "rgba(140,190,255,0.35)", color: "#EDF1FA" }} />
                       <button data-testid="submit-redeem-btn" onClick={doRedeem} disabled={submitting}
