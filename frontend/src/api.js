@@ -9,4 +9,4 @@ export const getRecentWinners = () => axios.get(`${API}/winners/recent`);
 export const getPoolStats = () => axios.get(`${API}/pool/stats`);
 export const getInviteInfo = () => axios.get(`${API}/invite/info?user_id=guest`);
 export const getLeaderboard = () => axios.get(`${API}/invite/leaderboard`);
-export const claimPrize = (code, address, network) => axios.post(`${API}/draw/claim`, { code, address, network });
+export const claimPrize = (code, account_id) => axios.post(`${API}/draw/claim`, { code, account_id });

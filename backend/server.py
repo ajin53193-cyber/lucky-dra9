@@ -105,23 +105,22 @@ async def spin(body: DrawCodeValidate):
 
 class RedeemSubmit(BaseModel):
     code: str
-    address: str
-    network: str = "TRC20"
+    account_id: str
 
 
 @api_router.post("/draw/claim")
 async def claim_prize(body: RedeemSubmit):
     code = body.code.strip().upper()
-    address = body.address.strip()
-    if not address:
-        raise HTTPException(status_code=400, detail="请填写收款账户")
+    account_id = body.account_id.strip()
+    if not account_id:
+        raise HTTPException(status_code=400, detail="请填写 GSET RWA 账户 ID")
     doc = await db.winners.find_one({"code": code}, {"_id": 0})
     if not doc:
         raise HTTPException(status_code=400, detail="未找到中奖记录")
     if doc["status"] != "won":
         raise HTTPException(status_code=400, detail="该奖励已提交领取")
     await db.winners.update_one({"code": code}, {"$set": {
-        "status": "submitted", "address": address, "network": body.network,
+        "status": "submitted", "account_id": account_id,
         "submitted_at": datetime.now(timezone.utc).isoformat(),
     }})
     return {"ok": True, "message": "领取申请已提交，客服核验后发放 USDT"}

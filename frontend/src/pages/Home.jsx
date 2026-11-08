@@ -339,7 +339,7 @@ export default function Home() {
         <button data-testid="nav-rules" onClick={() => navigate("/rules")} className="flex items-center gap-0.5">活动规则 <ChevronRight size={13} /></button>
         <button data-testid="nav-redeem" onClick={() => navigate("/redeem")} className="flex items-center gap-0.5">客服兑换 <ChevronRight size={13} /></button>
       </div>
-      <p className="relative z-10 text-center text-[12px] mt-3" style={{ color: "#AFC0E8" }}>中奖后填写收款账户，客服核验后发放 USDT</p>
+      <p className="relative z-10 text-center text-[12px] mt-3" style={{ color: "#AFC0E8" }}>中奖后填写 GSET RWA 账户 ID，客服核验后发放 USDT</p>
 
       <WinModal result={result} onClose={() => setResult(null)} onContact={() => { setResult(null); navigate("/redeem"); }} />
     </div>
