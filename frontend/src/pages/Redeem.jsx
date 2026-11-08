@@ -6,10 +6,10 @@ import { ASSETS, Sparkle, TechFrame } from "@/components/Decor";
 import { toast } from "sonner";
 
 const STEPS = [
-  { n: 1, text: "中奖后填写账户 ID" },
+  { n: 1, text: "中奖后填写收款ID" },
   { n: 2, text: "提交领取申请" },
-  { n: 3, text: "客服核验" },
-  { n: 4, text: "发放USDT奖励" },
+  { n: 3, text: "等待发放" },
+  { n: 4, text: "USDT到账" },
 ];
 
 const StepCircle = ({ n, first }) => (
