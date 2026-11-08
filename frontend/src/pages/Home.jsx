@@ -9,7 +9,7 @@ import { validateCode, spin, getRecentWinners, getPoolStats } from "@/api";
 import { playClick, playSpin, playWin } from "@/sound";
 import { toast } from "sonner";
 
-const PRIZES = [5000, 1000, 200, 50, 10, 2];
+const PRIZES = [8888, 1888, 588, 58, 18, 8];
 // 12 segments on the wheel, each prize appears twice (like the reference wheel)
 const SEGMENTS = Array.from({ length: 12 }, (_, i) => PRIZES[i % PRIZES.length]);
 const SEG_DEG = 360 / SEGMENTS.length;

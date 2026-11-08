@@ -39,8 +39,8 @@ async def ensure_indexes() -> None:
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
-PRIZES = [5000, 1000, 200, 50, 10, 2]
-PRIZE_WEIGHTS = [1, 4, 15, 30, 30, 20]
+PRIZES = [8888, 1888, 588, 58, 18, 8]
+PRIZE_WEIGHTS = [1, 3, 8, 20, 30, 38]
 TOTAL_POOL = 1_000_000
 
 
