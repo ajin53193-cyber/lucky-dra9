@@ -1,0 +1,159 @@
+{
+  "project_identity": {
+    "name": "GSET RWA Lucky Draw Mobile Web App",
+    "designer": "E1 - The Anti-AI Designer",
+    "aesthetic_archetype": "Dark Cyber-Fintech & Imperial Gold Glassmorphism",
+    "theme_type": "Dark Mode (深色金融科技)",
+    "target_platform": "Mobile Web App (Max-width 480px, optimized for 390px iPhone & modern Android)",
+    "language": "Simplified Chinese (中文界面)"
+  },
+  "color_system": {
+    "backgrounds": {
+      "app_bg": "#0F1320",
+      "app_bg_radial": "radial-gradient(ellipse at 50% -10%, #1E2945 0%, #0F1320 70%)",
+      "card_bg": "rgba(22, 28, 46, 0.75)",
+      "card_bg_solid": "#161C2E",
+      "surface_elevated": "rgba(30, 41, 69, 0.65)",
+      "input_bg": "rgba(15, 19, 32, 0.8)",
+      "overlay": "rgba(7, 9, 15, 0.85)"
+    },
+    "brand_colors": {
+      "primary_blue": "#3B7BFF",
+      "electric_blue": "#60A5FA",
+      "deep_blue": "#1E40AF",
+      "accent_gold": "#F5C76B",
+      "metallic_gold": "#D4AF37",
+      "gold_light": "#FFE899",
+      "glow_gold": "#FFD700"
+    },
+    "gradients": {
+      "blue_gold_linear": "linear-gradient(135deg, #3B7BFF 0%, #7B61FF 40%, #F5C76B 100%)",
+      "gold_metallic": "linear-gradient(135deg, #FFE899 0%, #F5C76B 45%, #C8962B 80%, #FFF5D0 100%)",
+      "gold_text": "linear-gradient(180deg, #FFF8E7 0%, #F5C76B 60%, #C9962A 100%)",
+      "blue_glow": "linear-gradient(180deg, rgba(59, 123, 255, 0.35) 0%, rgba(59, 123, 255, 0) 100%)",
+      "card_border_gradient": "linear-gradient(135deg, rgba(245, 199, 107, 0.4) 0%, rgba(59, 123, 255, 0.2) 50%, rgba(245, 199, 107, 0.1) 100%)",
+      "ticket_gradient": "linear-gradient(135deg, rgba(26, 34, 56, 0.95) 0%, rgba(18, 24, 40, 0.95) 100%)"
+    },
+    "functional_colors": {
+      "success_green": "#10B981",
+      "warning_amber": "#F59E0B",
+      "danger_red": "#EF4444",
+      "info_cyan": "#06B6D4"
+    },
+    "text_colors": {
+      "primary": "#F8FAFC",
+      "secondary": "#94A3B8",
+      "muted": "#64748B",
+      "gold_highlight": "#F5C76B",
+      "disabled": "#475569"
+    }
+  },
+  "typography": {
+    "font_family_display": "'Outfit', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",
+    "font_family_body": "'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif",
+    "font_family_mono": "'JetBrains Mono', 'Fira Code', monospace",
+    "hierarchy": {
+      "h1_hero": "text-3xl font-extrabold tracking-tight leading-tight",
+      "h2_section": "text-xl font-bold tracking-tight leading-snug",
+      "h3_card": "text-lg font-semibold leading-normal",
+      "body_main": "text-sm leading-relaxed",
+      "body_small": "text-xs leading-normal",
+      "caption": "text-[11px] tracking-wider uppercase"
+    }
+  },
+  "visual_enhancers": {
+    "glassmorphism": {
+      "standard": "backdrop-blur-xl bg-[#161C2E]/70 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.37)]",
+      "gold_tint": "backdrop-blur-2xl bg-[#1A2238]/80 border border-[#F5C76B]/30 shadow-[0_12px_40px_rgba(245,199,107,0.12)]",
+      "sheet_modal": "backdrop-blur-2xl bg-[#0F1320]/95 border-t border-[#F5C76B]/30 shadow-[0_-16px_48px_rgba(0,0,0,0.8)]"
+    },
+    "tech_frames": {
+      "clipped_corner": "polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))",
+      "ticket_notches": "mask ticket notched style with side radial cutouts at 50% height"
+    },
+    "textures_and_glows": {
+      "grid_pattern": "radial-gradient(rgba(59, 123, 255, 0.12) 1px, transparent 1px) 0 0 / 16px 16px",
+      "gold_sparkle_glow": "drop-shadow(0 0 15px rgba(245, 199, 107, 0.6))",
+      "blue_neon_glow": "drop-shadow(0 0 12px rgba(59, 123, 255, 0.5))"
+    }
+  },
+  "layout_and_spacing": {
+    "container_max_width": "max-w-[480px]",
+    "padding_mobile_x": "px-4 sm:px-5",
+    "spacing_scale": {
+      "tight": "space-y-2",
+      "normal": "space-y-4",
+      "loose": "space-y-6",
+      "section_gap": "mb-6"
+    },
+    "bottom_nav_height": "h-16",
+    "bottom_nav_safe_padding": "pb-24"
+  },
+  "component_guidelines": {
+    "prize_wheel_home": {
+      "wheel_center_btn": "Double layered 3D gold pulse button with '立即抽奖' gradient text and drop-shadow",
+      "wheel_sectors": "8 distinct prizes with alternating gold and metallic blue sectors, high contrast crisp icon + label styling",
+      "pool_card": "Glassmorphism card with progress bar (gold fill) indicating prize pool drop countdown and real-time remaining pool",
+      "marquee_ticker": "Smooth infinite scrolling text ticker with gold trophy icons showing user win history"
+    },
+    "win_modal": {
+      "trophy_graphic": "High-res golden 3D trophy asset with particle background halo effect",
+      "gset_id_input": "Styled input with gold accent focus ring, helper text, and validation message",
+      "submit_btn": "Full-width gold metallic gradient button with active scale feedback and sound trigger"
+    },
+    "my_codes_page": {
+      "code_cards": "Ticket-shaped cards with cutout notches, left gold accent ribbon, distinct status badges (未中奖 / 已中奖 / 待兑换)",
+      "filter_tabs": "Pill styled segmented tabs with active state gold sliding line"
+    },
+    "invite_page": {
+      "referral_card": "Prominent invite code section with quick one-tap copy button & Toast confirmation",
+      "leaderboard": "Top 10 inviter rank list with gold/silver/bronze badge indicators"
+    },
+    "redeem_page": {
+      "step_flow": "4-step clear visual roadmap with gold connected line nodes",
+      "contact_card": "Official customer service WeChat / Telegram / QR code card with quick copy action"
+    },
+    "rules_page": {
+      "rules_list": "Numbered luxury tech cards detailing GSET RWA points conversion, lucky draw limits, and legal terms"
+    }
+  },
+  "image_urls": {
+    "local_assets": {
+      "gold_wheel_3d": "/assets/gold_wheel_3d.webp",
+      "gold_trophy": "/assets/gold_trophy.webp",
+      "gold_coin": "/assets/gold_coin.webp",
+      "code_ticket": "/assets/code_ticket.webp",
+      "service_hex": "/assets/service_hex.webp",
+      "hex_check": "/assets/hex_check.webp"
+    },
+    "fallback_unsplash": {
+      "dark_crypto_bg": "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=1000&auto=format&fit=crop",
+      "gold_luxurious_texture": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop"
+    }
+  },
+  "motion_and_interactions": {
+    "wheel_spin": "Cubic-bezier(0.15, 0.99, 0.24, 1.0) custom 5s spin deceleration easing",
+    "modal_entry": "Spring scale from 0.9 to 1 with 20px blur un-blur fade",
+    "button_press": "whileTap scale 0.95 with instantaneous audio click feedback",
+    "card_hover": "Hover translate-y-[-2px] with gold border glow intensity increase"
+  },
+  "accessibility_and_contrast": {
+    "contrast_ratio": "Ensure all text on dark backgrounds meets APCA / WCAG AA minimum 4.5:1 ratio",
+    "focus_states": "Visible gold ring outline `focus:ring-2 focus:ring-[#F5C76B]`",
+    "text_contrast": "Primary white text #F8FAFC on #0F1320 background provides 14.2:1 contrast ratio"
+  },
+  "instructions_to_main_agent": [
+    "Upgrade all UI components to match the Awwwards-level Dark Cyber-Fintech & Gold Glassmorphism design guidelines.",
+    "Retain all existing data-testid attributes and exact component names/state logics.",
+    "Ensure mobile layout stays bounded inside max-w-[480px] centered on desktop screens.",
+    "Use Framer Motion for wheel spin, modals, tab switching, and code ticket list stagger animations.",
+    "Inject subtle particle glows, ticket side notches, and angled clipping edges using SVG/CSS clip-path."
+  ],
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
+    "All interactive and key informational elements MUST include a data-testid attribute to facilitate robust automated testing.",
+    "You MUST NOT center align the app container, i.e., do not add text-align: center globally.",
+    "You MUST NOT apply universal transitions like transition: all, as it breaks transforms. Always target specific properties.",
+    "Never use generic transparent backgrounds in headers, dropdowns, or overlays; always use glassmorphism with backdrop blur.",
+    "Never use placeholder URLs (via.placeholder.com). Only use official local assets or specified Unsplash URLs."
+  ]
+}
