@@ -312,15 +312,7 @@ export default function Home() {
         </div>
       </motion.div>
 
-      <motion.div className="relative z-10 px-4 mt-6" initial="hidden" whileInView="show" viewport={{ once: true }} variants={fadeUp}>
-        <div className="rounded-full p-[1.5px]" style={{ background: "linear-gradient(90deg,#F8D78C,rgba(248,215,140,0.3) 50%,#60A5FA)", boxShadow: "0 0 22px rgba(59,130,246,0.35)" }}>
-          <button data-testid="nav-codes" onClick={() => navigate("/codes")}
-            className="w-full rounded-full py-3.5 text-[16px] font-black gold-text"
-            style={{ background: "linear-gradient(180deg,#131B36,#0A0F24)" }}>我的抽奖码</button>
-        </div>
-      </motion.div>
-
-      <div className="relative z-10 px-4 mt-5 flex justify-center gap-10 text-[13px]" style={{ color: "#94A3B8" }}>
+      <div className="relative z-10 px-4 mt-7 flex justify-center gap-10 text-[13px]" style={{ color: "#94A3B8" }}>
         <button data-testid="nav-rules" onClick={() => navigate("/rules")} className="flex items-center gap-0.5">活动规则 <ChevronRight size={13} /></button>
         <button data-testid="nav-redeem" onClick={() => navigate("/redeem")} className="flex items-center gap-0.5">客服兑换 <ChevronRight size={13} /></button>
       </div>
