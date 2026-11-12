@@ -1,97 +1,56 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import { CheckCircle2, Clock, Copy, Package, BadgeCheck } from "lucide-react";
-import { PageHeader } from "@/components/PageHeader";
-import { adminGetClaims, adminPayClaim } from "@/api";
-import { toast } from "sonner";
+import { Ticket, BadgeCheck, Package, DollarSign, TrendingUp, CheckCircle2 } from "lucide-react";
+import { AdminShell } from "@/components/AdminShell";
+import { adminGetStats } from "@/api";
 
-const STATUS = {
-  won: { label: "待领取", color: "#F5C76B" },
-  submitted: { label: "已提交", color: "#60A5FA" },
-  paid: { label: "已发放", color: "#10B981" },
-};
-
-const fmt = (s) => new Date(s).toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+const Card = ({ label, value, sub, icon: Icon, color = "#60A5FA", delay = 0 }) => (
+  <motion.div className="glass p-4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay }}>
+    <div className="flex items-center justify-between">
+      <p className="text-[13px]" style={{ color: "#94A3B8" }}>{label}</p>
+      <Icon size={18} style={{ color }} />
+    </div>
+    <p className="font-num text-[30px] font-black mt-2" style={{ color }}>{value}</p>
+    {sub && <p className="text-[11px] mt-1" style={{ color: "#64748B" }}>{sub}</p>}
+  </motion.div>
+);
 
 export default function Admin() {
-  const [claims, setClaims] = useState([]);
-  const navigate = useNavigate();
-
-  const load = () => adminGetClaims().then((r) => setClaims(r.data.claims)).catch(() => {});
-  useEffect(() => { load(); }, []);
-
-  const doPay = async (code) => {
-    try {
-      await adminPayClaim(code);
-      toast.success(`已标记 ${code} 为已发放`);
-      load();
-    } catch (e) {
-      toast.error(e.response?.data?.detail || "操作失败");
-    }
-  };
-
-  const count = (s) => claims.filter((c) => c.status === s).length;
+  const [stats, setStats] = useState(null);
+  useEffect(() => { adminGetStats().then((r) => setStats(r.data)).catch(() => {}); }, []);
+  const pct = stats ? Math.min(100, Math.round(((stats.total_amount || 0) / stats.total_pool) * 100)) : 0;
 
   return (
-    <div className="min-h-screen pb-10">
-      <PageHeader title="后台审核台" subtitle="领取申请管理" />
-      <div className="px-4 mt-3">
-        <motion.div className="card-blue grid grid-cols-3 py-4 text-center" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          {[
-            { label: "待领取", n: count("won"), icon: <Clock size={16} className="mx-auto mb-1" /> },
-            { label: "已提交", n: count("submitted"), icon: <Package size={16} className="mx-auto mb-1" /> },
-            { label: "已发放", n: count("paid"), icon: <BadgeCheck size={16} className="mx-auto mb-1" /> },
-          ].map((s, i) => (
-            <div key={s.label} data-testid={`admin-stat-${s.label}`} className="relative">
-              {i > 0 && <span className="absolute left-0 top-2 bottom-2 w-px" style={{ background: "rgba(200,225,255,0.4)" }} />}
-              {s.icon}
-              <p className="text-[13px] font-medium text-white/95">{s.label}</p>
-              <p className="font-num text-[30px] leading-tight text-white" style={{ textShadow: "0 2px 8px rgba(0,20,90,0.5)" }}>{s.n}</p>
-            </div>
-          ))}
-        </motion.div>
-
-        <div className="mt-5 space-y-4">
-          {claims.map((c, i) => {
-            const st = STATUS[c.status] || { label: c.status, color: "#94A3B8" };
-            return (
-              <motion.div key={c.code} data-testid={`claim-card-${i}`} className="glass p-4"
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-[13px]" style={{ color: "#94A3B8" }}>抽奖码</p>
-                    <p className="font-mono text-[15px] font-bold" style={{ color: "#60A5FA" }}>{c.code}</p>
-                  </div>
-                  <span className="text-[12px] px-3 py-1 rounded-full font-bold" style={{ background: `${st.color}22`, color: st.color }}>{st.label}</span>
-                </div>
-                <p className="mt-3 text-[14px]" style={{ color: "#F8FAFC" }}>
-                  金额：<span className="font-num text-[22px] font-black" style={{ color: "#F5C76B" }}>{c.amount} USDT</span>
-                </p>
-                {c.account_id && (
-                  <p className="text-[12px] mt-1 flex items-center gap-1" style={{ color: "#94A3B8" }}>
-                    收款ID：<span className="font-mono" style={{ color: "#60A5FA" }}>{c.account_id}</span>
-                    <button onClick={() => { navigator.clipboard?.writeText(c.account_id); toast.success("已复制"); }} className="p-0.5"><Copy size={12} /></button>
-                  </p>
-                )}
-                <p className="text-[11px] mt-2" style={{ color: "#64748B" }}>{fmt(c.created_at)}</p>
-                {c.status === "submitted" && (
-                  <button data-testid={`pay-btn-${i}`} onClick={() => doPay(c.code)}
-                    className="btn-gold w-full py-2.5 mt-3 text-[15px] flex items-center justify-center gap-1.5">
-                    <CheckCircle2 size={16} /> 标记已发放
-                  </button>
-                )}
-              </motion.div>
-            );
-          })}
-          {claims.length === 0 && <div className="glass-dark p-8 text-center text-[14px]" style={{ color: "#94A3B8" }}>暂无领取申请</div>}
-        </div>
-
-        <button data-testid="admin-codes-btn" onClick={() => navigate("/admin/codes")}
-          className="btn-blue w-full py-3.5 mt-6 text-[16px]">
-          批量生成抽奖码
-        </button>
+    <AdminShell title="数据总览">
+      <div className="grid grid-cols-2 gap-3">
+        <Card label="抽奖码总数" value={stats?.total_codes ?? "-"} sub={`未使用 ${stats?.unused_codes ?? 0}`} icon={Ticket} color="#F5C76B" />
+        <Card label="中奖记录" value={stats?.total_wins ?? "-"} sub={`待领取 ${stats?.total_wins - (stats?.submitted ?? 0) - (stats?.paid ?? 0) || 0}`} icon={BadgeCheck} color="#60A5FA" delay={0.05} />
+        <Card label="已提交申请" value={stats?.submitted ?? "-"} sub="等待发放" icon={Package} color="#F59E0B" delay={0.1} />
+        <Card label="已发放 USDT" value={(stats?.paid_amount ?? 0).toLocaleString()} sub={`共 ${stats?.paid ?? 0} 笔`} icon={DollarSign} color="#10B981" delay={0.15} />
       </div>
-    </div>
+
+      <motion.div className="glass-gold p-5 mt-4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+        <div className="flex justify-between items-center">
+          <p className="text-[14px] font-bold" style={{ color: "#F8FAFC" }}>奖池消耗</p>
+          <p className="font-num text-[13px]" style={{ color: "#F5C76B" }}>{pct}%</p>
+        </div>
+        <div className="h-3 rounded-full mt-3 overflow-hidden" style={{ background: "rgba(6,14,44,0.9)", boxShadow: "inset 0 0 0 1px rgba(245,199,107,0.2)" }}>
+          <motion.div className="h-full rounded-full" style={{ background: "linear-gradient(90deg,#FFF0C8,#EDB65A,#C98A2B)" }}
+            initial={{ width: 0 }} animate={{ width: `${Math.max(pct, 2)}%` }} transition={{ duration: 1, ease: "easeOut" }} />
+        </div>
+        <div className="flex justify-between mt-2 text-[12px]" style={{ color: "#94A3B8" }}>
+          <span>已用 {(stats?.total_amount ?? 0).toLocaleString()} USDT</span>
+          <span>总池 {(stats?.total_pool ?? 0).toLocaleString()} USDT</span>
+        </div>
+      </motion.div>
+
+      <motion.div className="glass p-5 mt-4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+        <p className="text-[14px] font-bold mb-3" style={{ color: "#F8FAFC" }}>快捷操作</p>
+        <div className="grid grid-cols-2 gap-3">
+          <a href="/admin/codes" className="btn-blue py-3 text-center text-[14px] font-bold flex items-center justify-center gap-1.5"><Ticket size={15} /> 生成抽奖码</a>
+          <a href="/admin/claims" className="btn-gold py-3 text-center text-[14px] font-bold flex items-center justify-center gap-1.5"><CheckCircle2 size={15} /> 审核领取</a>
+        </div>
+      </motion.div>
+    </AdminShell>
   );
 }

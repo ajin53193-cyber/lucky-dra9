@@ -45,11 +45,61 @@ TOTAL_POOL = 1_000_000
 
 
 def gen_code(prefix: str) -> str:
-    return prefix + "".join(random.choices(string.digits, k=8))
+    return prefix + "".join(random.choices(string.digits, k=10))
 
 
 class DrawCodeValidate(BaseModel):
     code: str
+
+
+# ---------- Admin settings ----------
+
+
+class SettingsUpdate(BaseModel):
+    total_pool: int | None = None
+    activity_title: str | None = None
+    activity_active: bool | None = None
+
+
+@api_router.get("/admin/settings")
+async def admin_get_settings():
+    s = await db.settings.find_one({"_id": "main"})
+    if not s:
+        s = {"_id": "main", "total_pool": TOTAL_POOL, "activity_title": "GSET 机构 RWA 幸运抽奖", "activity_active": True}
+        await db.settings.insert_one(s)
+    return {k: v for k, v in s.items() if k != "_id"}
+
+
+@api_router.post("/admin/settings")
+async def admin_update_settings(body: SettingsUpdate):
+    update = {k: v for k, v in body.model_dump().items() if v is not None}
+    if update:
+        await db.settings.update_one({"_id": "main"}, {"$set": update}, upsert=True)
+    return {"ok": True}
+
+
+@api_router.get("/admin/stats")
+async def admin_stats():
+    total_codes = await db.draw_codes.count_documents({})
+    used_codes = await db.draw_codes.count_documents({"status": "used"})
+    total_wins = await db.winners.count_documents({})
+    submitted = await db.winners.count_documents({"status": "submitted"})
+    paid = await db.winners.count_documents({"status": "paid"})
+    total_amount = await db.winners.aggregate([{"$group": {"_id": None, "t": {"$sum": "$amount"}}}]).to_list(1)
+    paid_amount = await db.winners.aggregate([{"$match": {"status": "paid"}}, {"$group": {"_id": None, "t": {"$sum": "$amount"}}}]).to_list(1)
+    settings = await db.settings.find_one({"_id": "main"})
+    total_pool = (settings or {}).get("total_pool", TOTAL_POOL)
+    return {
+        "total_codes": total_codes,
+        "used_codes": used_codes,
+        "unused_codes": total_codes - used_codes,
+        "total_wins": total_wins,
+        "submitted": submitted,
+        "paid": paid,
+        "total_amount": total_amount[0]["t"] if total_amount else 0,
+        "paid_amount": paid_amount[0]["t"] if paid_amount else 0,
+        "total_pool": total_pool,
+    }
 
 
 class DrawResult(BaseModel):
@@ -200,9 +250,20 @@ async def admin_batch_gen(body: BatchGen):
 
 
 @api_router.get("/admin/codes")
-async def admin_codes(limit: int = Query(200, ge=1, le=500)):
-    codes = await db.draw_codes.find({}, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
+async def admin_codes(limit: int = Query(500, ge=1, le=1000), status: str | None = None, amount: int | None = None):
+    q = {}
+    if status:
+        q["status"] = status
+    if amount:
+        q["amount"] = amount
+    codes = await db.draw_codes.find(q, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
     return {"codes": codes}
+
+
+
+
+
+
 
 
 async def seed_demo_data():

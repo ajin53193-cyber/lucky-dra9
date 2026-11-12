@@ -9,6 +9,8 @@ import Redeem from "@/pages/Redeem";
 import Rules from "@/pages/Rules";
 import Admin from "@/pages/Admin";
 import AdminCodes from "@/pages/AdminCodes";
+import AdminClaims from "@/pages/AdminClaims";
+import AdminSettings from "@/pages/AdminSettings";
 import { PageBg } from "@/components/Decor";
 
 function App() {
@@ -31,6 +33,8 @@ function App() {
             <Route path="/rules" element={<Rules />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/codes" element={<AdminCodes />} />
+            <Route path="/admin/claims" element={<AdminClaims />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
           </Routes>
         </BrowserRouter>
       </div>
