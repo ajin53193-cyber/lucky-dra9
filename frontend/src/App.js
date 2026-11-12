@@ -5,9 +5,10 @@ import Lenis from "lenis";
 import { Toaster } from "sonner";
 import Home from "@/pages/Home";
 import MyCodes from "@/pages/MyCodes";
-import Invite from "@/pages/Invite";
 import Redeem from "@/pages/Redeem";
 import Rules from "@/pages/Rules";
+import Admin from "@/pages/Admin";
+import AdminCodes from "@/pages/AdminCodes";
 import { PageBg } from "@/components/Decor";
 
 function App() {
@@ -26,9 +27,10 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/codes" element={<MyCodes />} />
-            <Route path="/invite" element={<Invite />} />
             <Route path="/redeem" element={<Redeem />} />
             <Route path="/rules" element={<Rules />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/codes" element={<AdminCodes />} />
           </Routes>
         </BrowserRouter>
       </div>

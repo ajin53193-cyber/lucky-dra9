@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { CheckCircle2, XCircle, Search, ChevronRight, Diamond, Trophy, Info } from "lucide-react";
+import { CheckCircle2, XCircle, Search, ChevronRight, Trophy, Info } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { WinModal } from "@/components/WinModal";
 import { Coin, Sparkle, Ribbon, TechFrame } from "@/components/Decor";
@@ -204,9 +204,7 @@ export default function Home() {
             <p className="text-[9px] tracking-[0.3em] mt-0.5" style={{ color: "#64748B" }}>LUCKY DRAW</p>
           </div>
         </div>
-        <button data-testid="connect-wallet-btn" className="pill-outline px-4 py-1.5 text-[13px] font-medium flex items-center gap-1.5" style={{ color: "#60A5FA" }}>
-          <Diamond size={13} /> 连接钱包
-        </button>
+        <span className="pill-outline px-4 py-1.5 text-[11px] font-bold tracking-wider" style={{ color: "#60A5FA" }}>总奖池 100万 USDT</span>
       </nav>
 
       <motion.div className="relative z-10 px-4 pt-5 text-center" initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.1 } } }}>
@@ -316,11 +314,9 @@ export default function Home() {
 
       <motion.div className="relative z-10 px-4 mt-6" initial="hidden" whileInView="show" viewport={{ once: true }} variants={fadeUp}>
         <div className="rounded-full p-[1.5px]" style={{ background: "linear-gradient(90deg,#F8D78C,rgba(248,215,140,0.3) 50%,#60A5FA)", boxShadow: "0 0 22px rgba(59,130,246,0.35)" }}>
-          <div className="flex items-center rounded-full p-1.5" style={{ background: "linear-gradient(180deg,#131B36,#0A0F24)" }}>
-            <button data-testid="nav-codes" onClick={() => navigate("/codes")} className="flex-1 py-2.5 text-[15px] font-black gold-text">我的抽奖码</button>
-            <span className="w-px h-8" style={{ background: "rgba(96,165,250,0.3)" }} />
-            <button data-testid="nav-invite" onClick={() => navigate("/invite")} className="btn-blue px-10 py-3 text-[17px] tracking-widest">邀请</button>
-          </div>
+          <button data-testid="nav-codes" onClick={() => navigate("/codes")}
+            className="w-full rounded-full py-3.5 text-[16px] font-black gold-text"
+            style={{ background: "linear-gradient(180deg,#131B36,#0A0F24)" }}>我的抽奖码</button>
         </div>
       </motion.div>
 

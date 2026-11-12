@@ -154,25 +154,55 @@ async def pool_stats():
     return {"total_pool": TOTAL_POOL, "used": used, "remaining": TOTAL_POOL - used}
 
 
-@api_router.get("/invite/info")
-async def invite_info(user_id: str = Query("guest")):
-    invite = await db.invites.find_one({"user_id": user_id}, {"_id": 0})
-    if not invite:
-        invite_doc = {
-            "user_id": user_id,
-            "invite_url": f"https://gset-rwa.example.com/invite/{user_id[:8]}",
-            "invited_count": 0,
-            "visit_count": random.randint(3, 15),
-        }
-        await db.invites.insert_one(invite_doc)
-        return {k: v for k, v in invite_doc.items() if k != "_id"}
-    return invite
+# ---------- Admin ----------
 
 
-@api_router.get("/invite/leaderboard")
-async def invite_leaderboard(limit: int = Query(10, ge=1, le=20)):
-    leaders = await db.invites.find({}, {"_id": 0}).sort("invited_count", -1).limit(limit).to_list(limit)
-    return {"leaders": leaders}
+class BatchGen(BaseModel):
+    amount: int
+    count: int
+
+
+@api_router.get("/admin/claims")
+async def admin_claims():
+    claims = await db.winners.find({}, {"_id": 0}).sort("created_at", -1).to_list(200)
+    return {"claims": claims}
+
+
+@api_router.post("/admin/claims/{code}/pay")
+async def admin_pay(code: str):
+    doc = await db.winners.find_one({"code": code.strip().upper()})
+    if not doc:
+        raise HTTPException(status_code=404, detail="未找到该记录")
+    if doc["status"] != "submitted":
+        raise HTTPException(status_code=400, detail="该记录不是待发放状态")
+    await db.winners.update_one({"code": code.strip().upper()}, {"$set": {"status": "paid", "paid_at": datetime.now(timezone.utc).isoformat()}})
+    return {"ok": True}
+
+
+@api_router.post("/admin/codes/batch")
+async def admin_batch_gen(body: BatchGen):
+    if body.amount not in PRIZES:
+        raise HTTPException(status_code=400, detail="无效的金额档位")
+    count = min(body.count, 200)
+    now = datetime.now(timezone.utc)
+    docs = []
+    for _ in range(count):
+        docs.append({
+            "code": gen_code("CODE"),
+            "user_id": "guest",
+            "status": "unused",
+            "amount": body.amount,
+            "created_at": now.isoformat(),
+            "expires_at": (now + timedelta(days=30)).isoformat(),
+        })
+    await db.draw_codes.insert_many(docs)
+    return {"ok": True, "generated": count, "codes": [d["code"] for d in docs]}
+
+
+@api_router.get("/admin/codes")
+async def admin_codes(limit: int = Query(200, ge=1, le=500)):
+    codes = await db.draw_codes.find({}, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
+    return {"codes": codes}
 
 
 async def seed_demo_data():
