@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Lenis from "lenis";
 import { Toaster } from "sonner";
 import Home from "@/pages/Home";
@@ -9,6 +9,7 @@ import Admin from "@/pages/Admin";
 import AdminCodes from "@/pages/AdminCodes";
 import AdminClaims from "@/pages/AdminClaims";
 import AdminSettings from "@/pages/AdminSettings";
+import AdminLogin from "@/pages/AdminLogin";
 import { PageBg } from "@/components/Decor";
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/rules" element={<Rules />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/codes" element={<AdminCodes />} />
             <Route path="/admin/claims" element={<AdminClaims />} />

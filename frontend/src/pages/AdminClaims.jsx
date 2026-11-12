@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle2, Clock, Copy, Package, BadgeCheck } from "lucide-react";
+import { CheckCircle2, Clock, Copy, Package, BadgeCheck, Download } from "lucide-react";
 import { AdminShell } from "@/components/AdminShell";
-import { adminGetClaims, adminPayClaim } from "@/api";
+import { adminGetClaims, adminPayClaim, exportClaims } from "@/api";
 import { toast } from "sonner";
 
 const STATUS = {
@@ -37,21 +37,27 @@ export default function AdminClaims() {
 
   return (
     <AdminShell title="领取审核">
-      <div className="flex gap-2 mb-4 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
-        {[
-          { key: "all", label: `全部 ${claims.length}` },
-          { key: "won", label: `待领取 ${count("won")}` },
-          { key: "submitted", label: `已提交 ${count("submitted")}` },
-          { key: "paid", label: `已发放 ${count("paid")}` },
-        ].map((t) => (
-          <button key={t.key} data-testid={`filter-${t.key}`} onClick={() => setFilter(t.key)}
-            className="shrink-0 px-4 py-2 rounded-full text-[13px] font-bold transition-all"
-            style={filter === t.key
-              ? { background: "linear-gradient(180deg,#FFF0C8,#EDB65A)", color: "#3A2306" }
-              : { background: "rgba(96,165,250,0.1)", color: "#94A3B8", border: "1px solid rgba(96,165,250,0.2)" }}>
-            {t.label}
-          </button>
-        ))}
+      <div className="flex items-center justify-between mb-4 gap-2">
+        <div className="flex gap-2 overflow-x-auto pb-1 flex-1" style={{ scrollbarWidth: "none" }}>
+          {[
+            { key: "all", label: `全部 ${claims.length}` },
+            { key: "won", label: `待领取 ${count("won")}` },
+            { key: "submitted", label: `已提交 ${count("submitted")}` },
+            { key: "paid", label: `已发放 ${count("paid")}` },
+          ].map((t) => (
+            <button key={t.key} data-testid={`filter-${t.key}`} onClick={() => setFilter(t.key)}
+              className="shrink-0 px-4 py-2 rounded-full text-[13px] font-bold transition-all"
+              style={filter === t.key
+                ? { background: "linear-gradient(180deg,#FFF0C8,#EDB65A)", color: "#3A2306" }
+                : { background: "rgba(96,165,250,0.1)", color: "#94A3B8", border: "1px solid rgba(96,165,250,0.2)" }}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <button data-testid="export-claims-btn" onClick={() => exportClaims(filter === "all" ? null : filter)}
+          className="pill-outline shrink-0 px-3.5 py-2 text-[13px] flex items-center gap-1" style={{ color: "#60A5FA" }}>
+          <Download size={13} /> 导出
+        </button>
       </div>
 
       <div className="space-y-4">

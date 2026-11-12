@@ -1,16 +1,20 @@
 import asyncio
 import random
 import string
+import csv
+import io
 from contextlib import suppress
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, APIRouter, Query, HTTPException
+from fastapi import FastAPI, APIRouter, Query, HTTPException, Request, Depends
+from fastapi.responses import StreamingResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, ConfigDict
 from pymongo import ASCENDING, DESCENDING, IndexModel
 from starlette.middleware.cors import CORSMiddleware
+import jwt
 import os
 import logging
 
@@ -43,6 +47,54 @@ PRIZES = [8888, 1888, 588, 58, 18, 8]
 PRIZE_WEIGHTS = [1, 3, 8, 20, 30, 38]
 TOTAL_POOL = 1_000_000
 
+JWT_ALGORITHM = "HS256"
+
+
+def get_jwt_secret() -> str:
+    return os.environ["JWT_SECRET"]
+
+
+def create_admin_token() -> str:
+    payload = {"sub": "admin", "role": "admin", "exp": datetime.now(timezone.utc) + timedelta(hours=12), "type": "access"}
+    return jwt.encode(payload, get_jwt_secret(), algorithm=JWT_ALGORITHM)
+
+
+async def require_admin(request: Request):
+    auth = request.headers.get("Authorization", "")
+    token = auth[7:] if auth.startswith("Bearer ") else None
+    if not token:
+        raise HTTPException(status_code=401, detail="未登录")
+    try:
+        payload = jwt.decode(token, get_jwt_secret(), algorithms=[JWT_ALGORITHM])
+        if payload.get("role") != "admin":
+            raise HTTPException(status_code=403, detail="无权限")
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="登录已过期")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="无效凭证")
+
+
+class AdminLogin(BaseModel):
+    password: str
+
+
+@api_router.post("/admin/login")
+async def admin_login(body: AdminLogin):
+    if body.password != os.environ["ADMIN_PASSWORD"]:
+        raise HTTPException(status_code=401, detail="密码错误")
+    return {"token": create_admin_token()}
+
+
+def make_csv(rows, headers):
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(headers)
+    for r in rows:
+        w.writerow(r)
+    buf.seek(0)
+    return StreamingResponse(iter([buf.getvalue()]), media_type="text/csv", headers={"Content-Disposition": "attachment; filename=export.csv"})
+
 
 def gen_code(prefix: str) -> str:
     return prefix + "".join(random.choices(string.digits, k=10))
@@ -62,7 +114,7 @@ class SettingsUpdate(BaseModel):
 
 
 @api_router.get("/admin/settings")
-async def admin_get_settings():
+async def admin_get_settings(_=Depends(require_admin)):
     s = await db.settings.find_one({"_id": "main"})
     if not s:
         s = {"_id": "main", "total_pool": TOTAL_POOL, "activity_title": "GSET 机构 RWA 幸运抽奖", "activity_active": True}
@@ -71,7 +123,7 @@ async def admin_get_settings():
 
 
 @api_router.post("/admin/settings")
-async def admin_update_settings(body: SettingsUpdate):
+async def admin_update_settings(body: SettingsUpdate, _=Depends(require_admin)):
     update = {k: v for k, v in body.model_dump().items() if v is not None}
     if update:
         await db.settings.update_one({"_id": "main"}, {"$set": update}, upsert=True)
@@ -79,7 +131,7 @@ async def admin_update_settings(body: SettingsUpdate):
 
 
 @api_router.get("/admin/stats")
-async def admin_stats():
+async def admin_stats(_=Depends(require_admin)):
     total_codes = await db.draw_codes.count_documents({})
     used_codes = await db.draw_codes.count_documents({"status": "used"})
     total_wins = await db.winners.count_documents({})
@@ -213,13 +265,13 @@ class BatchGen(BaseModel):
 
 
 @api_router.get("/admin/claims")
-async def admin_claims():
-    claims = await db.winners.find({}, {"_id": 0}).sort("created_at", -1).to_list(200)
+async def admin_claims(_=Depends(require_admin)):
+    claims = await db.winners.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
     return {"claims": claims}
 
 
 @api_router.post("/admin/claims/{code}/pay")
-async def admin_pay(code: str):
+async def admin_pay(code: str, _=Depends(require_admin)):
     doc = await db.winners.find_one({"code": code.strip().upper()})
     if not doc:
         raise HTTPException(status_code=404, detail="未找到该记录")
@@ -230,7 +282,7 @@ async def admin_pay(code: str):
 
 
 @api_router.post("/admin/codes/batch")
-async def admin_batch_gen(body: BatchGen):
+async def admin_batch_gen(body: BatchGen, _=Depends(require_admin)):
     if body.amount not in PRIZES:
         raise HTTPException(status_code=400, detail="无效的金额档位")
     count = min(body.count, 200)
@@ -250,7 +302,7 @@ async def admin_batch_gen(body: BatchGen):
 
 
 @api_router.get("/admin/codes")
-async def admin_codes(limit: int = Query(500, ge=1, le=1000), status: str | None = None, amount: int | None = None):
+async def admin_codes(limit: int = Query(500, ge=1, le=1000), status: str | None = None, amount: int | None = None, _=Depends(require_admin)):
     q = {}
     if status:
         q["status"] = status
@@ -258,6 +310,28 @@ async def admin_codes(limit: int = Query(500, ge=1, le=1000), status: str | None
         q["amount"] = amount
     codes = await db.draw_codes.find(q, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
     return {"codes": codes}
+
+
+@api_router.get("/admin/export/codes")
+async def admin_export_codes(status: str | None = None, amount: int | None = None, _=Depends(require_admin)):
+    q = {}
+    if status:
+        q["status"] = status
+    if amount:
+        q["amount"] = amount
+    codes = await db.draw_codes.find(q, {"_id": 0}).sort("created_at", -1).to_list(5000)
+    rows = [[c["code"], c.get("amount", ""), {"unused": "未使用", "used": "已使用", "expired": "已失效"}.get(c["status"], c["status"]), c.get("created_at", "")] for c in codes]
+    return make_csv(rows, ["抽奖码", "金额USDT", "状态", "创建时间"])
+
+
+@api_router.get("/admin/export/claims")
+async def admin_export_claims(status: str | None = None, _=Depends(require_admin)):
+    q = {}
+    if status:
+        q["status"] = status
+    claims = await db.winners.find(q, {"_id": 0}).sort("created_at", -1).to_list(5000)
+    rows = [[c["code"], c.get("amount", ""), {"won": "待领取", "submitted": "已提交", "paid": "已发放"}.get(c["status"], c["status"]), c.get("account_id", ""), c.get("created_at", ""), c.get("paid_at", "")] for c in claims]
+    return make_csv(rows, ["抽奖码", "金额USDT", "状态", "收款ID", "中奖时间", "发放时间"])
 
 
 

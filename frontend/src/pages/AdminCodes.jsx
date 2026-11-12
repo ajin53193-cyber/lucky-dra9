@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Copy, Ticket, Plus } from "lucide-react";
+import { Copy, Ticket, Plus, Download } from "lucide-react";
 import { AdminShell } from "@/components/AdminShell";
-import { adminGetCodes, adminBatchGen } from "@/api";
+import { adminGetCodes, adminBatchGen, exportCodes } from "@/api";
 import { toast } from "sonner";
 
 const AMOUNTS = [8, 18, 58, 588, 1888, 8888];
@@ -37,7 +37,7 @@ export default function AdminCodes() {
 
   return (
     <AdminShell title="抽奖码管理">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
         <div className="flex gap-2">
           <select data-testid="filter-amount" value={filterAmt} onChange={(e) => setFilterAmt(Number(e.target.value))}
             className="px-3 py-2 rounded-xl text-[13px] font-bold outline-none"
@@ -54,9 +54,14 @@ export default function AdminCodes() {
             <option value="expired">已失效</option>
           </select>
         </div>
-        <button data-testid="toggle-gen-btn" onClick={() => setShowGen(!showGen)} className="btn-gold px-4 py-2 text-[13px] flex items-center gap-1">
-          <Plus size={14} /> 生成
-        </button>
+        <div className="flex gap-2 shrink-0">
+          <button data-testid="export-codes-btn" onClick={() => exportCodes(filterStatus || null, filterAmt || null)} className="pill-outline px-3.5 py-2 text-[13px] flex items-center gap-1" style={{ color: "#60A5FA" }}>
+            <Download size={13} /> 导出
+          </button>
+          <button data-testid="toggle-gen-btn" onClick={() => setShowGen(!showGen)} className="btn-gold px-4 py-2 text-[13px] flex items-center gap-1">
+            <Plus size={14} /> 生成
+          </button>
+        </div>
       </div>
 
       {showGen && (
