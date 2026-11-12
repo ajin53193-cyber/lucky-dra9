@@ -6,6 +6,7 @@ import { Coin, Sparkle, TechFrame } from "@/components/Decor";
 
 const RULES = [
   "总奖池 1,000,000 USDT，所有奖品均以 USDT 发放",
+  "抽奖码分 6 档金额：8 / 18 / 58 / 588 / 1888 / 8888 USDT，每个抽奖码对应固定奖项",
   "需要输入有效抽奖码校验后，方可参与抽奖",
   "一个抽奖码仅限抽奖 1 次",
   "抽奖中奖不会自动到账，需填写 GSET RWA 收款ID",

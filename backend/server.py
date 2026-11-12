@@ -89,7 +89,9 @@ async def spin(body: DrawCodeValidate):
     if not doc or doc["status"] != "unused":
         raise HTTPException(status_code=400, detail="抽奖码无效、已使用或已过期")
 
-    amount = random.choices(PRIZES, weights=PRIZE_WEIGHTS, k=1)[0]
+    amount = doc.get("amount")
+    if amount is None:
+        amount = random.choices(PRIZES, weights=PRIZE_WEIGHTS, k=1)[0]
     wallet = doc.get("wallet", "0x" + "".join(random.choices("0123456789abcdef", k=40)))
 
     await db.draw_codes.update_one({"code": code}, {"$set": {"status": "used", "used_at": datetime.now(timezone.utc).isoformat()}})

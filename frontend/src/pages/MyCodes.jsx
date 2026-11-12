@@ -62,6 +62,14 @@ export default function MyCodes() {
                   <p className="text-[17px] font-black whitespace-nowrap">
                     <span className="gold-text">抽奖码：</span><span className="font-num tracking-wide cream">{c.code}</span>
                   </p>
+                  {c.amount != null && (
+                    <span data-testid={`code-amount-${i}`} className="ml-auto shrink-0 px-2.5 py-0.5 rounded-full font-num text-[13px] font-black"
+                      style={active
+                        ? { background: "rgba(252,227,162,0.18)", border: "1px solid rgba(245,199,107,0.6)", color: "#FFE899" }
+                        : { background: "rgba(96,165,250,0.12)", border: "1px solid rgba(96,165,250,0.35)", color: "#93C5FD" }}>
+                      {c.amount} USDT
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-end justify-between mt-3">
                   <div className="pl-5 space-y-2 text-[15px] text-white">
