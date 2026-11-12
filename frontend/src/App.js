@@ -4,7 +4,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Lenis from "lenis";
 import { Toaster } from "sonner";
 import Home from "@/pages/Home";
-import Redeem from "@/pages/Redeem";
 import Rules from "@/pages/Rules";
 import Admin from "@/pages/Admin";
 import AdminCodes from "@/pages/AdminCodes";
@@ -27,7 +26,6 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/redeem" element={<Redeem />} />
             <Route path="/rules" element={<Rules />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/codes" element={<AdminCodes />} />

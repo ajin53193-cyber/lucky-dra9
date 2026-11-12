@@ -312,13 +312,12 @@ export default function Home() {
         </div>
       </motion.div>
 
-      <div className="relative z-10 px-4 mt-7 flex justify-center gap-10 text-[13px]" style={{ color: "#94A3B8" }}>
+      <div className="relative z-10 px-4 mt-7 flex justify-center text-[13px]" style={{ color: "#94A3B8" }}>
         <button data-testid="nav-rules" onClick={() => navigate("/rules")} className="flex items-center gap-0.5">活动规则 <ChevronRight size={13} /></button>
-        <button data-testid="nav-redeem" onClick={() => navigate("/redeem")} className="flex items-center gap-0.5">客服兑换 <ChevronRight size={13} /></button>
       </div>
       <p className="relative z-10 text-center text-[11px] mt-3" style={{ color: "#64748B" }}>中奖后填写 GSET RWA 收款ID，USDT 将发放至该账户</p>
 
-      <WinModal result={result} onClose={() => setResult(null)} onContact={() => { setResult(null); navigate("/redeem"); }} />
+      <WinModal result={result} onClose={() => setResult(null)} />
     </div>
   );
 }

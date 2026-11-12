@@ -19,7 +19,7 @@ const Confetti = () => (
   </div>
 );
 
-export const WinModal = ({ result, onClose, onContact }) => {
+export const WinModal = ({ result, onClose }) => {
   const [accountId, setAccountId] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
