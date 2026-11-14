@@ -1,0 +1,30 @@
+GSET RWA 抽奖网站 - 宝塔部署说明
+================================
+
+一、上传文件
+1. 宝塔面板 → 文件 → 上传本压缩包到 /www/wwwroot/
+2. 解压后重命名为 gset-rwa
+
+二、一键部署
+cd /www/wwwroot/gset-rwa
+bash deploy_baota.sh
+
+三、宝塔面板配置（必做）
+1. 软件商店安装：MongoDB、PM2管理器、Nginx
+2. 网站 → 添加站点，绑定你的域名
+3. 网站设置 → 网站目录：/www/wwwroot/gset-rwa/frontend/build
+4. 网站设置 → 反向代理：
+   - 目标URL: http://127.0.0.1:8001
+   - 代理目录: /api
+5. 修改 frontend/.env 里的域名为你的真实域名
+6. 重新构建前端: cd frontend && yarn build
+
+四、访问地址
+- 用户端: https://你的域名.com
+- 后台: https://你的域名.com/admin/login
+- 后台密码: aa554288
+
+五、常用命令
+- 查看后端日志: pm2 logs gset-backend
+- 重启后端: pm2 restart gset-backend
+- 修改密码: 编辑 backend/.env 的 ADMIN_PASSWORD，然后 pm2 restart gset-backend
