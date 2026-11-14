@@ -304,7 +304,7 @@ export default function Home() {
                   className="flex items-center gap-2 px-4 text-[12px] whitespace-nowrap" style={{ color: "#94A3B8" }}>
                   <span className="font-mono blue-text">{maskWallet(w.wallet)}</span>
                   <span className="font-num gold-text text-[13px]">{w.amount} USDT</span>
-                  <span>{w.status === "submitted" ? "已提交" : "待领取"}</span>
+                  <span>{w.status === "paid" ? "已发放" : w.status === "submitted" ? "已提交" : "待领取"}</span>
                 </div>
               ))}
             </div>
