@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Wallet, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
@@ -20,9 +20,13 @@ const Confetti = () => (
 );
 
 export const WinModal = ({ result, onClose }) => {
-  const [accountId, setAccountId] = useState("");
+  const [accountId, setAccountId] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("gset_win") || "{}")[result?.code]?.account_id || ""; } catch { return ""; }
+  });
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [submitted, setSubmitted] = useState(() => {
+    try { return !!JSON.parse(localStorage.getItem("gset_win") || "{}")[result?.code]?.submitted; } catch { return false; }
+  });
 
   const doRedeem = async () => {
     if (!accountId.trim()) return toast.error("请填写 GSET RWA 收款ID");
@@ -30,6 +34,7 @@ export const WinModal = ({ result, onClose }) => {
     try {
       await claimPrize(result.code, accountId);
       setSubmitted(true);
+      localStorage.setItem("gset_win", JSON.stringify({ ...JSON.parse(localStorage.getItem("gset_win") || "{}"), [result.code]: { account_id: accountId, submitted: true } }));
       toast.success("领取申请已提交");
     } catch (e) {
       toast.error(e.response?.data?.detail || "提交失败");
