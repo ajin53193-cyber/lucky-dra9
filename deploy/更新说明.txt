@@ -1,0 +1,26 @@
+GSET RWA 更新说明（手机页面缩小 / 点输入框放大 修复版）
+=====================================================
+
+本压缩包已包含【已编译好的前端】 frontend/build/ ，服务器上不需要再编译前端。
+本压缩包【不包含】 backend/.env 、 frontend/.env 和 docker-compose.yml ，解压覆盖不会改掉服务器上的配置和端口（8003）。
+
+为什么之前“重新部署还是一样”：
+- 网站由宝塔 Nginx 直接读取 /www/wwwroot/gset-rwa/frontend/build 里的文件。
+- docker compose up -d --build 只会在容器内部重新编译，不会更新宿主机的 frontend/build，
+  所以 Nginx 一直在发旧页面。
+
+更新步骤（宝塔终端）：
+1. 上传本压缩包到 /www/wwwroot/ ，然后执行：
+   cd /www/wwwroot/gset-rwa
+   tar xzf ../gset-rwa-full.tar.gz
+2. 检查新前端已到位（应看到 maximum-scale=1）：
+   grep -o 'maximum-scale=1' frontend/build/index.html
+3. 后端如有更新，只重建本项目（不要停其它容器）：
+   docker compose up -d --build app
+4. 建议在宝塔 → 网站 → www.1883m.cc → 配置文件 的 location / 中加入，防止手机缓存旧首页：
+   add_header Cache-Control "no-cache";
+   保存后重载 Nginx。
+5. 手机上关闭页面重新打开（微信里右上角 → 刷新）。
+
+验证：电脑上访问 https://www.1883m.cc 查看网页源代码，
+viewport 应为 width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover
