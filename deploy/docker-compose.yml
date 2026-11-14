@@ -1,0 +1,24 @@
+version: "3.8"
+services:
+  mongo:
+    image: mongo:7
+    restart: always
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: gset_rwa
+  app:
+    build: .
+    restart: always
+    ports:
+      - "8001:8001"
+    environment:
+      MONGO_URL: mongodb://mongo:27017
+      DB_NAME: gset_rwa
+      CORS_ORIGINS: "*"
+      JWT_SECRET: c5dad5c020ffa997ef986dd10e2ff334b7fff7c140ae93ffa6fc6b03adab1e47
+      ADMIN_PASSWORD: aa554288
+    depends_on:
+      - mongo
+volumes:
+  mongo_data:

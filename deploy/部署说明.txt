@@ -1,30 +1,26 @@
-GSET RWA 抽奖网站 - 宝塔部署说明
+GSET RWA 抽奖网站 - 宝塔一键部署
 ================================
 
-一、上传文件
-1. 宝塔面板 → 文件 → 上传本压缩包到 /www/wwwroot/
-2. 解压后重命名为 gset-rwa
+【方法一：Docker 一键部署（推荐，最简单）】
+1. 宝塔面板 → 文件 → 上传本压缩包到 /www/wwwroot/，解压重命名为 gset-rwa
+2. 宝塔终端执行：
+   cd /www/wwwroot/gset-rwa
+   bash 一键部署.sh
+3. 完成！访问 http://你的IP:8001
+4. 绑定域名：宝塔 → 网站 → 添加站点 → 反向代理到 127.0.0.1:8001
 
-二、一键部署
-cd /www/wwwroot/gset-rwa
-bash deploy_baota.sh
+【方法二：宝塔手动部署】
+1. 软件商店安装：MongoDB、PM2管理器
+2. cd /www/wwwroot/gset-rwa && bash deploy_baota.sh
+3. 宝塔 → 网站 → 添加站点 → 网站目录指向 frontend/build
+4. 反向代理 /api → http://127.0.0.1:8001
 
-三、宝塔面板配置（必做）
-1. 软件商店安装：MongoDB、PM2管理器、Nginx
-2. 网站 → 添加站点，绑定你的域名
-3. 网站设置 → 网站目录：/www/wwwroot/gset-rwa/frontend/build
-4. 网站设置 → 反向代理：
-   - 目标URL: http://127.0.0.1:8001
-   - 代理目录: /api
-5. 修改 frontend/.env 里的域名为你的真实域名
-6. 重新构建前端: cd frontend && yarn build
+【访问地址】
+- 用户端: https://你的域名
+- 后台: https://你的域名/admin/login
+- 密码: aa554288
 
-四、访问地址
-- 用户端: https://你的域名.com
-- 后台: https://你的域名.com/admin/login
-- 后台密码: aa554288
-
-五、常用命令
-- 查看后端日志: pm2 logs gset-backend
-- 重启后端: pm2 restart gset-backend
-- 修改密码: 编辑 backend/.env 的 ADMIN_PASSWORD，然后 pm2 restart gset-backend
+【常用命令】
+- 查看日志: docker compose logs -f app
+- 重启: docker compose restart
+- 修改密码: 编辑 docker-compose.yml 的 ADMIN_PASSWORD 后 docker compose up -d
