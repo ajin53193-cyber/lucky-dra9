@@ -42,15 +42,24 @@ const Wheel = ({ rotation, spinning, ready, onSpin }) => {
       <svg viewBox={`0 0 ${S} ${S}`} className="absolute inset-0 w-full h-full"
         style={{ transform: `rotate(${rotation}deg)`, transition: spinning ? "transform 4.6s cubic-bezier(0.12, 0.85, 0.08, 1)" : "none" }}>
         <defs>
+          {/* segment colours sampled from the reference wheel: royal blue / near-black navy */}
           <radialGradient id="segBlue" cx="50%" cy="50%" r="50%">
-            <stop offset="25%" stopColor="#3B82F6" /><stop offset="100%" stopColor="#1E40AF" />
+            <stop offset="25%" stopColor="#2F63D0" /><stop offset="100%" stopColor="#1B3C98" />
           </radialGradient>
           <radialGradient id="segDark" cx="50%" cy="50%" r="50%">
-            <stop offset="25%" stopColor="#1A2440" /><stop offset="100%" stopColor="#0A0F24" />
+            <stop offset="25%" stopColor="#171D3A" /><stop offset="100%" stopColor="#090D22" />
           </radialGradient>
+          {/* reference: GOLD amounts on blue segments, SILVER amounts on dark segments */}
           <linearGradient id="wGoldTxt" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#FFF8E7" /><stop offset="55%" stopColor="#F7D082" /><stop offset="100%" stopColor="#E0A443" />
+            <stop offset="0%" stopColor="#FFF6C8" /><stop offset="40%" stopColor="#FFDD7A" />
+            <stop offset="75%" stopColor="#F5BE45" /><stop offset="100%" stopColor="#D9962A" />
           </linearGradient>
+          <linearGradient id="wSilverTxt" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#FFFFFF" /><stop offset="50%" stopColor="#DDE3F8" /><stop offset="100%" stopColor="#A9B4DC" />
+          </linearGradient>
+          <filter id="txtShadow" x="-20%" y="-30%" width="140%" height="160%">
+            <feDropShadow dx="0" dy="1.6" stdDeviation="0.9" floodColor="#050A1E" floodOpacity="0.85" />
+          </filter>
           <linearGradient id="wGoldRim2" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor="#FFF1C4" /><stop offset="30%" stopColor="#F2C063" />
             <stop offset="55%" stopColor="#A86E1E" /><stop offset="80%" stopColor="#F5CD78" /><stop offset="100%" stopColor="#B57A25" />
@@ -60,18 +69,20 @@ const Wheel = ({ rotation, spinning, ready, onSpin }) => {
           const [x0, y0] = polar(r, i * SEG_DEG);
           const [x1, y1] = polar(r, (i + 1) * SEG_DEG);
           const mid = i * SEG_DEG + SEG_DEG / 2;
-          const [ax, ay] = polar(r * 0.74, mid);
-          const [ux, uy] = polar(r * 0.56, mid);
+          const [ax, ay] = polar(r * 0.77, mid);
+          const [ux, uy] = polar(r * 0.6, mid);
           const blue = i % 2 === 0;
+          const txtFill = blue ? "url(#wGoldTxt)" : "url(#wSilverTxt)";
           return (
             <g key={i}>
               <path d={`M ${c} ${c} L ${x0} ${y0} A ${r} ${r} 0 0 1 ${x1} ${y1} Z`}
                 fill={blue ? "url(#segBlue)" : "url(#segDark)"} stroke="rgba(245,199,107,0.5)" strokeWidth="1.2" />
-              <text x={ax} y={ay} transform={`rotate(${mid} ${ax} ${ay})`} textAnchor="middle" dominantBaseline="middle"
-                fill="url(#wGoldTxt)" fontSize={p >= 1000 ? 26 : 30} fontWeight="800" fontFamily="'JetBrains Mono', monospace"
-                style={{ paintOrder: "stroke", stroke: "rgba(40,20,0,0.35)", strokeWidth: 1 }}>{p}</text>
-              <text x={ux} y={uy} transform={`rotate(${mid} ${ux} ${uy})`} textAnchor="middle" dominantBaseline="middle"
-                fill={blue ? "#FFE899" : "#BFDBFE"} fontSize="14" fontWeight="800" fontFamily="'JetBrains Mono', monospace" letterSpacing="1">USDT</text>
+              <g filter="url(#txtShadow)">
+                <text data-testid={`wheel-amount-${i}`} x={ax} y={ay} transform={`rotate(${mid} ${ax} ${ay})`} textAnchor="middle" dominantBaseline="middle"
+                  fill={txtFill} fontSize={p >= 1000 ? 27 : 33} fontWeight="800" fontFamily="Outfit, 'PingFang SC', Arial, sans-serif">{p}</text>
+                <text x={ux} y={uy} transform={`rotate(${mid} ${ux} ${uy})`} textAnchor="middle" dominantBaseline="middle"
+                  fill={txtFill} fontSize="15.5" fontWeight="800" fontFamily="Outfit, 'PingFang SC', Arial, sans-serif" letterSpacing="0.3">USDT</text>
+              </g>
             </g>
           );
         })}
