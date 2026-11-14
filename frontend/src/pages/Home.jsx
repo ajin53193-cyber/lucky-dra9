@@ -7,6 +7,7 @@ import { WinModal } from "@/components/WinModal";
 import { Coin, Sparkle, Ribbon, TechFrame } from "@/components/Decor";
 import { validateCode, spin, getRecentWinners, getPoolStats } from "@/api";
 import { playClick, playSpin, playWin } from "@/sound";
+import { saveWin, latestPendingWin } from "@/winStore";
 import { toast } from "sonner";
 
 const PRIZES = [8888, 1888, 588, 58, 18, 8];
@@ -137,6 +138,7 @@ export default function Home() {
   const [result, setResult] = useState(null);
   const [winners, setWinners] = useState([]);
   const [pool, setPool] = useState({ total_pool: 1000000, used: 0 });
+  const [pendingWin, setPendingWin] = useState(() => latestPendingWin());
   const rotRef = useRef(0);
 
   useEffect(() => {
@@ -175,6 +177,8 @@ export default function Home() {
       setRotation(next);
       setTimeout(() => {
         setSpinning(false);
+        saveWin(res.data.code, { amount: res.data.amount, submitted: false });
+        setPendingWin(latestPendingWin());
         setResult(res.data);
         playWin();
         setValidatedCode(null);
@@ -244,6 +248,15 @@ export default function Home() {
           </div>
         </div>
       </motion.div>
+
+      {pendingWin && !result && (
+        <div className="relative z-10 px-4 mt-3">
+          <button data-testid="pending-win-btn" onClick={() => setResult({ code: pendingWin.code, amount: pendingWin.amount })}
+            className="btn-gold w-full py-2.5 px-4 text-[14px] flex items-center justify-center gap-1.5">
+            你有 <span className="font-num text-[16px]">{pendingWin.amount} USDT</span> 奖励待领取 · 去填写收款ID <ChevronRight size={15} />
+          </button>
+        </div>
+      )}
 
       <motion.div className="relative mt-10" initial="hidden" animate="show" variants={fadeUp}>
         <Ribbon color="gold" className="-left-3 top-6" style={{ width: 64, height: 120 }} />
@@ -317,7 +330,8 @@ export default function Home() {
       </div>
       <p className="relative z-10 text-center text-[11px] mt-3" style={{ color: "#64748B" }}>中奖后填写 GSET RWA 收款ID，USDT 将发放至该账户</p>
 
-      <WinModal result={result} onClose={() => setResult(null)} />
+      <WinModal result={result} onClose={() => { setResult(null); setPendingWin(latestPendingWin()); }}
+        onSubmitted={() => setPendingWin(latestPendingWin())} />
     </div>
   );
 }

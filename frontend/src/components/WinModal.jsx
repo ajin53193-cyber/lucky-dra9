@@ -4,6 +4,7 @@ import { X, Wallet, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { ASSETS, Coin, Sparkle, Ribbon } from "@/components/Decor";
 import { claimPrize } from "@/api";
+import { getWin, saveWin } from "@/winStore";
 
 const Confetti = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -19,25 +20,43 @@ const Confetti = () => (
   </div>
 );
 
-export const WinModal = ({ result, onClose }) => {
-  const [accountId, setAccountId] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("gset_win") || "{}")[result?.code]?.account_id || ""; } catch { return ""; }
-  });
+export const WinModal = ({ result, onClose, onSubmitted }) => {
+  const code = result?.code;
+  const [accountId, setAccountId] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(() => {
-    try { return !!JSON.parse(localStorage.getItem("gset_win") || "{}")[result?.code]?.submitted; } catch { return false; }
-  });
+  const [submitted, setSubmitted] = useState(false);
+
+  // The modal stays mounted between wins, so (re)load the saved state for THIS code
+  // every time a different result is shown.
+  useEffect(() => {
+    if (!code) return;
+    const saved = getWin(code);
+    setAccountId(saved?.account_id || "");
+    setSubmitted(!!saved?.submitted);
+  }, [code]);
+
+  const onAccountChange = (v) => {
+    setAccountId(v);
+    saveWin(code, { amount: result?.amount, account_id: v });
+  };
 
   const doRedeem = async () => {
     if (!accountId.trim()) return toast.error("请填写 GSET RWA 收款ID");
     setSubmitting(true);
     try {
-      await claimPrize(result.code, accountId);
+      await claimPrize(code, accountId);
       setSubmitted(true);
-      localStorage.setItem("gset_win", JSON.stringify({ ...JSON.parse(localStorage.getItem("gset_win") || "{}"), [result.code]: { account_id: accountId, submitted: true } }));
+      saveWin(code, { amount: result.amount, account_id: accountId.trim(), submitted: true });
+      onSubmitted?.(code);
       toast.success("领取申请已提交");
     } catch (e) {
-      toast.error(e.response?.data?.detail || "提交失败");
+      const detail = e.response?.data?.detail;
+      if (detail === "该奖励已提交领取") {
+        setSubmitted(true);
+        saveWin(code, { amount: result.amount, submitted: true });
+        onSubmitted?.(code);
+      }
+      toast.error(detail || "提交失败");
     } finally {
       setSubmitting(false);
     }
@@ -106,7 +125,7 @@ export const WinModal = ({ result, onClose }) => {
                   ) : (
                     <div className="mt-4 rounded-2xl px-4 py-4 text-left" style={{ background: "rgba(10,20,60,0.55)", border: "1px solid rgba(147,197,253,0.35)" }}>
                       <p className="text-[13px] font-bold text-white mb-2 flex items-center gap-1.5"><Wallet size={14} style={{ color: "#F5C76B" }} /> 填写 GSET RWA 收款ID领取奖励</p>
-                      <input data-testid="account-id-input" value={accountId} onChange={(e) => setAccountId(e.target.value)}
+                      <input data-testid="account-id-input" value={accountId} onChange={(e) => onAccountChange(e.target.value)}
                         placeholder="输入你的 GSET RWA 收款ID"
                         className="w-full bg-transparent border rounded-xl px-3.5 py-2.5 text-[14px] font-mono outline-none"
                         style={{ borderColor: "rgba(147,197,253,0.35)", color: "#F8FAFC" }} />

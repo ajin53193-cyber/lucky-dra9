@@ -242,7 +242,8 @@ async def my_codes(user_id: str = Query("guest")):
 
 @api_router.get("/winners/recent")
 async def recent_winners(limit: int = Query(20, ge=1, le=50)):
-    winners = await db.winners.find({}, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
+    # never expose draw codes / account IDs publicly: a code is all that /draw/claim needs
+    winners = await db.winners.find({}, {"_id": 0, "code": 0, "account_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
     return {"winners": winners}
 
 
