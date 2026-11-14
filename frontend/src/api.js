@@ -1,6 +1,9 @@
 import axios from "axios";
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+// Fall back to same-origin "/api" when REACT_APP_BACKEND_URL is not set at build time
+// (self-hosted Docker / Nginx builds). Otherwise the URL becomes "undefined/api/..." and every call 404s.
+const BACKEND = (process.env.REACT_APP_BACKEND_URL || "").replace(/\/+$/, "");
+const API = `${BACKEND}/api`;
 
 export const getToken = () => sessionStorage.getItem("admin_token") || "";
 export const setToken = (t) => sessionStorage.setItem("admin_token", t);
